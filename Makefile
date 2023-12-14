@@ -21,7 +21,7 @@ build: ## Build all executables
 	go build ./cmd/search
 
 .PHONY: all
-all: build
+all: build fmt lint test
 
 .PHONY: test
 test: ## Run tests
@@ -52,20 +52,6 @@ check: ## Compile everything, checking syntax (does not output binaries)
 .env:
 	if [ ! -f ".env" ]; then cp example.dev.env .env; fi
 
-# .PHONY: run-dev-bgs
-# run-dev-bgs: .env ## Runs 'bigsky' BGS for local dev
-# 	GOLOG_LOG_LEVEL=info go run ./cmd/bigsky --admin-key localdev 
-# # --crawl-insecure-ws 
-
-# .PHONY: build-bgs-image
-# build-bgs-image: ## Builds 'bigsky' BGS docker image
-# 	docker build -t bigsky -f cmd/bigsky/Dockerfile .
-
-# .PHONY: run-bgs-image
-# run-bgs-image:
-# 	docker run -p 2470:2470 bigsky /bigsky --admin-key localdev
-# # --crawl-insecure-ws 
-
 .PHONY: run-dev-accounts
 run-dev-accounts: .env ## Runs accounts for local dev
 	GOLOG_LOG_LEVEL=info go run ./cmd/accounts
@@ -74,56 +60,30 @@ run-dev-accounts: .env ## Runs accounts for local dev
 build-accounts-image:
 	docker build -t accounts -f cmd/accounts/Dockerfile .
 
+.PHONY: run-accounts-image
+run-accounts-image:
+	docker run -p 9010:9010 accounts /accounts
+
 .PHONY: run-dev-admins
 run-dev-admins: .env ## Runs admins for local dev
 	GOLOG_LOG_LEVEL=info go run ./cmd/admins
+
+.PHONY: build-admins-image
+build-admins-image:
+	docker build -t admins -f cmd/admins/Dockerfile .
+
+.PHONY: run-admins-image
+run-admins-image:
+	docker run -p 9011:9011 admins /admins
 
 .PHONY: run-dev-search
 run-dev-search: .env ## Runs search for local dev
 	GOLOG_LOG_LEVEL=info go run ./cmd/search
 
-.PHONY: sonar-up
-sonar-up: # Runs sonar docker container
-	docker compose -f cmd/sonar/docker-compose.yml up --build -d || docker-compose -f cmd/sonar/docker-compose.yml up --build -d
+.PHONY: build-search-image
+build-search-image:
+	docker build -t search -f cmd/search/Dockerfile .
 
-.PHONY: sc-reload
-sc-reload: # Reloads supercollider
-	go run cmd/supercollider/main.go \
-		reload \
-		--port 6125 --total-events 2000000 \
-		--hostname alpha.supercollider.jazco.io \
-		--key-file out/alpha.pem \
-		--output-file out/alpha_in.cbor
-
-.PHONY: sc-fire
-sc-fire: # Fires supercollider
-	go run cmd/supercollider/main.go \
-		fire \
-		--port 6125 --events-per-second 10000 \
-		--hostname alpha.supercollider.jazco.io \
-		--key-file out/alpha.pem \
-		--input-file out/alpha_in.cbor
-
-.PHONY: run-netsync
-run-netsync: .env ## Runs netsync for local dev
-	go run ./cmd/netsync --checkout-limit 30 --worker-count 60 --out-dir ../netsync-out
-
-SCYLLA_VERSION := latest
-SCYLLA_CPU := 0
-SCYLLA_NODES := 127.0.0.1:9042
-
-.PHONY: netsync-playback
-netsync-playback: .env ## Runs netsync for local dev
-	go run ./cmd/netsync --worker-count 96 --out-dir ../netsync-out_2023_08_25 playback --scylla-nodes $(SCYLLA_NODES)
-
-.PHONY: run-scylla
-run-scylla:
-	@echo "==> Running test instance of Scylla $(SCYLLA_VERSION)"
-	@docker pull scylladb/scylla:$(SCYLLA_VERSION)
-	@docker run --name scylla -p 9042:9042 --cpuset-cpus=$(SCYLLA_CPU) --memory 1G --rm -d scylladb/scylla:$(SCYLLA_VERSION)
-	@until docker exec scylla cqlsh -e "DESCRIBE SCHEMA"; do sleep 2; done
-
-.PHONY: stop-scylla
-stop-scylla:
-	@echo "==> Stopping test instance of Scylla $(SCYLLA_VERSION)"
-	@docker stop scylla
+.PHONY: run-search-image
+run-search-image:
+	docker run -p 9012:9012 search /search

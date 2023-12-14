@@ -8,7 +8,7 @@ WORKDIR /dockerbuild
 # timezone data for alpine builds
 ENV GOEXPERIMENT=loopvar
 RUN GIT_VERSION=$(git describe --tags --long --always) && \
-    go build -tags timetzdata -o /palomar ./cmd/palomar
+    go build -tags timetzdata -o /accounts ./cmd/accounts
 
 ### Run stage
 FROM alpine:3.18

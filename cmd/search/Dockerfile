@@ -8,7 +8,7 @@ WORKDIR /dockerbuild
 # timezone data for alpine builds
 ENV GOEXPERIMENT=loopvar
 RUN GIT_VERSION=$(git describe --tags --long --always) && \
-    go build -tags timetzdata -o /accounts ./cmd/accounts
+    go build -tags timetzdata -o /search ./cmd/search
 
 ### Run stage
 FROM alpine:3.18
@@ -17,13 +17,13 @@ RUN apk add --no-cache --update dumb-init ca-certificates
 ENTRYPOINT ["dumb-init", "--"]
 
 WORKDIR /
-RUN mkdir -p data/accounts
-COPY --from=build-env /accounts /
+RUN mkdir -p data/search
+COPY --from=build-env /search /
 
 # small things to make golang binaries work well under alpine
 ENV GODEBUG=netdns=go
 ENV TZ=Etc/UTC
 
-EXPOSE 9010
+EXPOSE 9012
 
-CMD ["/accounts", "run"]
+CMD ["/search", "run"]

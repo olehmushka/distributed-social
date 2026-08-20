@@ -1,3 +1,6 @@
+// Package server provides the fx module shared by every service's
+// entrypoint: an http.Server bound to a mux.Router, with graceful
+// shutdown wired into fx's lifecycle hooks.
 package server
 
 import (

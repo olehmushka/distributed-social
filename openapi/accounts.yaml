@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  title: accounts
+  description: Owns users and posts. Publishes accounts.post.created after each post.
+  version: "1.0"
+servers:
+  - url: http://localhost:9010
+paths:
+  /ping:
+    get:
+      summary: Liveness check
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResp"
+  /info:
+    get:
+      summary: Service metadata
+      responses:
+        "200":
+          description: OK
+  /users:
+    post:
+      summary: Create a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, displayName]
+              properties:
+                username:
+                  type: string
+                  pattern: "^[a-zA-Z0-9_]{3,32}$"
+                displayName:
+                  type: string
+      responses:
+        "200":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Validation failure
+        "409":
+          description: Username already taken
+  /users/{id}:
+    get:
+      summary: Get a user
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+  /users/{id}/posts:
+    post:
+      summary: Create a post as this user
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 500
+      responses:
+        "200":
+          description: Created; publishes accounts.post.created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          description: Validation failure
+        "403":
+          description: Author is suspended
+        "404":
+          description: Author not found
+    get:
+      summary: List a user's posts, most recent first
+      parameters:
+        - $ref: "#/components/parameters/UserID"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+  /posts/{id}:
+    get:
+      summary: Get a post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Not found
+
+components:
+  parameters:
+    UserID:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string }
+        displayName: { type: string }
+        status: { type: string, enum: [active, suspended] }
+        createdAt: { type: string, format: date-time }
+    Post:
+      type: object
+      properties:
+        id: { type: string }
+        authorId: { type: string }
+        content: { type: string }
+        status: { type: string, enum: [active, removed] }
+        createdAt: { type: string, format: date-time }
+    SuccessResp:
+      type: object
+      properties:
+        status: { type: string }
+        data: {}
+        metadata: { type: object }

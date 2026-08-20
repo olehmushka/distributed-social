@@ -1,0 +1,121 @@
+openapi: 3.0.3
+info:
+  title: admins
+  description: Moderation service. Records an audit log and publishes moderation events; never writes to accounts' or search's data directly.
+  version: "1.0"
+servers:
+  - url: http://localhost:9011
+paths:
+  /ping:
+    get:
+      summary: Liveness check
+      responses:
+        "200":
+          description: OK
+  /info:
+    get:
+      summary: Service metadata
+      responses:
+        "200":
+          description: OK
+  /moderation/users/{id}/suspend:
+    post:
+      summary: Suspend a user; publishes admins.user.suspended
+      parameters:
+        - $ref: "#/components/parameters/TargetID"
+      requestBody:
+        $ref: "#/components/requestBodies/ModerationRequest"
+      responses:
+        "200":
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationAction"
+        "400":
+          description: Missing actorId/reason
+  /moderation/users/{id}/restore:
+    post:
+      summary: Restore a suspended user; publishes admins.user.restored
+      parameters:
+        - $ref: "#/components/parameters/TargetID"
+      requestBody:
+        $ref: "#/components/requestBodies/ModerationRequest"
+      responses:
+        "200":
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationAction"
+  /moderation/posts/{id}/remove:
+    post:
+      summary: Remove a post; publishes admins.post.removed
+      parameters:
+        - $ref: "#/components/parameters/TargetID"
+      requestBody:
+        $ref: "#/components/requestBodies/ModerationRequest"
+      responses:
+        "200":
+          description: Recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationAction"
+  /moderation/actions:
+    get:
+      summary: List the moderation audit log, most recent first
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ModerationAction"
+
+components:
+  parameters:
+    TargetID:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBodies:
+    ModerationRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [actorId, reason]
+            properties:
+              actorId: { type: string }
+              reason: { type: string }
+  schemas:
+    ModerationAction:
+      type: object
+      properties:
+        id: { type: string }
+        actorId: { type: string }
+        targetType: { type: string, enum: [user, post] }
+        targetId: { type: string }
+        action:
+          type: string
+          enum: [suspend_user, restore_user, remove_post]
+        reason: { type: string }
+        createdAt: { type: string, format: date-time }

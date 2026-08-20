@@ -1,3 +1,6 @@
+// Package httputils provides the shared JSON response writer every
+// service's handlers use (schemas.SuccessResp/FailureResp/ErrorResp),
+// plus small request-scoped helpers like ExtractRequestID.
 package httputils
 
 import (

@@ -1,3 +1,7 @@
+// Package search is the HTTP transport layer for the search service: a
+// query handler plus the fx wiring that assembles the domain service in
+// internal/search and registers its event consumers. There is no write
+// handler here on purpose -- see internal/search's package doc.
 package search
 
 import (

@@ -1,0 +1,48 @@
+# distributed-social
+
+> Event-driven Go microservices (accounts, admins, search) that share no
+> database and never call each other synchronously -- coordination is
+> entirely through a NATS JetStream event stream. Each service owns its
+> own Postgres instance and its own SQL migrations.
+
+This file follows the [llms.txt](https://llmstxt.org) convention: a
+short, structured entrypoint for language models and coding agents
+reading this repository, pointing to the canonical docs rather than
+duplicating them.
+
+## Start here
+
+- [README.md](README.md): what this is, quickstart, tech stack, and the
+  explicit trade-offs made (eventual consistency, no transactional
+  outbox, database-per-service).
+- [AGENTS.md](AGENTS.md): instructions for AI coding agents -- repo
+  layout, hard architectural rules, how to verify a change. Claude Code
+  also reads [CLAUDE.md](CLAUDE.md), which just points back here.
+- [docs/architecture.md](docs/architecture.md): the event flow between
+  the three services, why it's shaped this way, and the full event
+  contract table (subjects, publishers, consumers).
+
+## API reference
+
+- [docs/api/accounts.md](docs/api/accounts.md) /
+  [openapi/accounts.yaml](openapi/accounts.yaml)
+- [docs/api/admins.md](docs/api/admins.md) /
+  [openapi/admins.yaml](openapi/admins.yaml)
+- [docs/api/search.md](docs/api/search.md) /
+  [openapi/search.yaml](openapi/search.yaml)
+
+## Source layout
+
+- `internal/<service>/` -- domain logic (models, repository interface +
+  Postgres implementation, service with validation/business rules/event
+  handling, unit tests against fakes, embedded SQL migrations).
+- `api/<service>/` -- HTTP handlers/routes and the `fx` dependency-
+  injection wiring that assembles a service's dependencies.
+- `internal/eventbus/` -- NATS JetStream wrapper.
+- `internal/eventsapi/` -- the shared event contract every service
+  imports (subjects + payload structs).
+
+## Optional
+
+- [CONTRIBUTING.md](CONTRIBUTING.md), [CHANGELOG.md](CHANGELOG.md),
+  [SECURITY.md](SECURITY.md).

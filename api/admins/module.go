@@ -1,3 +1,6 @@
+// Package admins is the HTTP transport layer for the admins service:
+// handlers, routes, and the fx wiring that assembles the domain service
+// in internal/admins with its Postgres pool and event-bus connection.
 package admins
 
 import (

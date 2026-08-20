@@ -1,3 +1,6 @@
+// Package accounts is the HTTP transport layer for the accounts service:
+// handlers, routes, and the fx wiring that assembles the domain service
+// in internal/accounts with its Postgres pool and event-bus connection.
 package accounts
 
 import (

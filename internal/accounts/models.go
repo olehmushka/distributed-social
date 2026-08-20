@@ -1,3 +1,7 @@
+// Package accounts is the source of truth for users and posts. It's the
+// only package in this repo allowed to write to the accounts database,
+// and it publishes events (see internal/eventsapi) after every write so
+// other services can react without ever reading this data directly.
 package accounts
 
 import "time"

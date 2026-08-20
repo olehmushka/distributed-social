@@ -1,3 +1,6 @@
+// Package admins implements moderation: suspending/restoring users and
+// removing posts. It keeps its own audit log and publishes an event for
+// every action; it never writes to accounts' or search's data directly.
 package admins
 
 import "time"

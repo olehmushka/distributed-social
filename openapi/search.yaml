@@ -1,0 +1,66 @@
+openapi: 3.0.3
+info:
+  title: search
+  description: Read-only full-text search over active posts. No write API -- every row exists because an event put it there.
+  version: "1.0"
+servers:
+  - url: http://localhost:9012
+paths:
+  /ping:
+    get:
+      summary: Liveness check
+      responses:
+        "200":
+          description: OK
+  /info:
+    get:
+      summary: Service metadata
+      responses:
+        "200":
+          description: OK
+  /search:
+    get:
+      summary: Full-text search over active, non-removed, non-suspended-author posts
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/SearchResult"
+        "400":
+          description: Missing or empty query
+
+components:
+  schemas:
+    SearchResult:
+      type: object
+      properties:
+        postId: { type: string }
+        authorId: { type: string }
+        authorUsername: { type: string }
+        content: { type: string }
+        createdAt: { type: string, format: date-time }
+        rank: { type: number, format: double }

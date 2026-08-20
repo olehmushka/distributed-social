@@ -1,3 +1,6 @@
+// Package schemas defines the shared HTTP response envelope every
+// service's handlers write: SuccessResp, FailureResp, and ErrorResp,
+// each carrying the same Metadata block (request id, duration, version).
 package schemas
 
 type Status string
@@ -8,13 +11,13 @@ const (
 	ErrorStatus   Status = "error"
 )
 
-type SuccessResp[T interface{}] struct {
+type SuccessResp[T any] struct {
 	Status   Status    `json:"status"`
 	Data     T         `json:"data"`
 	Metadata *Metadata `json:"metadata"`
 }
 
-type FailureResp[T interface{}] struct {
+type FailureResp[T any] struct {
 	Status   Status    `json:"status"`
 	Data     T         `json:"data"`
 	Message  string    `json:"message"`

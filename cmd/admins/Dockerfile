@@ -9,7 +9,7 @@ ENV GOEXPERIMENT=loopvar
 RUN go build -tags timetzdata -o /admins ./cmd/admins
 
 ### Run stage
-FROM alpine:3.22
+FROM alpine:3.24
 
 RUN apk add --no-cache --update dumb-init ca-certificates wget && \
     addgroup -S app && adduser -S app -G app

@@ -49,7 +49,7 @@ func (w *writer) WriteSuccess(ctx context.Context, payload interface{}) error {
 	return w.write(resp)
 }
 
-func CreateFail[T interface{}](ctx context.Context, err error, data T) (*schemas.FailureResp[T], error) {
+func CreateFail[T interface{}](ctx context.Context, inErr error, data T) (*schemas.FailureResp[T], error) {
 	metadata, err := GetMetadata(ctx)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func CreateFail[T interface{}](ctx context.Context, err error, data T) (*schemas
 
 	return &schemas.FailureResp[T]{
 		Data:     data,
-		Message:  err.Error(),
+		Message:  inErr.Error(),
 		Metadata: metadata,
 		Status:   schemas.FailureStatus,
 	}, nil
@@ -76,14 +76,14 @@ func (w *writer) WriteFail(ctx context.Context, inErr error, data interface{}) e
 	return w.write(resp)
 }
 
-func CreateError(ctx context.Context, err error) (*schemas.ErrorResp, error) {
+func CreateError(ctx context.Context, inErr error) (*schemas.ErrorResp, error) {
 	metadata, err := GetMetadata(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &schemas.ErrorResp{
-		Message:  err.Error(),
+		Message:  inErr.Error(),
 		Metadata: metadata,
 		Status:   schemas.ErrorStatus,
 	}, nil
@@ -99,6 +99,22 @@ func (w *writer) WriteError(ctx context.Context, inErr error) error {
 		return err
 	}
 	w.writeHeaders(nil, http.StatusInternalServerError)
+	return w.write(resp)
+}
+
+// WriteStatus writes inErr as an ErrorResp under an explicit status code,
+// for domain errors (not found, conflict, forbidden) that don't fit the
+// generic 400/500 split of WriteFail/WriteError.
+func (w *writer) WriteStatus(ctx context.Context, statusCode int, inErr error) error {
+	if inErr == nil {
+		return nil
+	}
+
+	resp, err := CreateError(ctx, inErr)
+	if err != nil {
+		return err
+	}
+	w.writeHeaders(nil, statusCode)
 	return w.write(resp)
 }
 

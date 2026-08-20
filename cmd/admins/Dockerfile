@@ -1,5 +1,5 @@
 ### Compile stage
-FROM golang:1.25-alpine3.21 AS build-env
+FROM golang:1.26.6-alpine AS build-env
 RUN apk add --no-cache build-base make git
 
 ADD . /dockerbuild
@@ -9,7 +9,7 @@ ENV GOEXPERIMENT=loopvar
 RUN go build -tags timetzdata -o /admins ./cmd/admins
 
 ### Run stage
-FROM alpine:3.21
+FROM alpine:3.22
 
 RUN apk add --no-cache --update dumb-init ca-certificates wget && \
     addgroup -S app && adduser -S app -G app

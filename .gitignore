@@ -7,12 +7,19 @@
 *.dll
 *.so
 *.dylib
+/accounts
+/admins
+/search
 
 # Test binary, built with `go test -c`
 *.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Local environment overrides -- example.dev.env is the template that's
+# meant to be committed; .env is per-developer and never is.
+.env
 
 # Dependency directories (remove the comment below to include it)
 # vendor/

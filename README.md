@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/olehmushka/distributed-social/actions/workflows/ci.yml/badge.svg)](https://github.com/olehmushka/distributed-social/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/olehmushka/distributed-social.svg)](https://pkg.go.dev/github.com/olehmushka/distributed-social)
-[![Go Report Card](https://goreportcard.com/badge/github.com/olehmushka/distributed-social)](https://goreportcard.com/report/github.com/olehmushka/distributed-social)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/olehmushka/distributed-social)](go.mod)
 [![License: MIT](https://img.shields.io/github/license/olehmushka/distributed-social)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/olehmushka/distributed-social)](https://github.com/olehmushka/distributed-social/commits/main)

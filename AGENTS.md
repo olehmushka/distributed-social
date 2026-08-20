@@ -47,6 +47,10 @@ HTTP call.
    parameter silently clobbered it. `CreateFail`/`CreateError` name that
    parameter `inErr` specifically to avoid recreating this -- keep that
    convention if you touch this file.
+5. **Branch and commit naming follow [CONTRIBUTING.md](CONTRIBUTING.md#git-conventions):**
+   branches as `<type>/<kebab-description>`, commits as Conventional
+   Commits (`feat:`, `fix:`, `docs:`, ...). If you're committing on
+   behalf of a user, use that format unless they say otherwise.
 
 ## Verifying a change
 

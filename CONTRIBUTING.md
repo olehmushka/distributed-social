@@ -35,12 +35,74 @@ together before making a change that crosses a service boundary.
   don't rely on mocked tests alone for anything that touches the HTTP or
   event-bus boundary.
 
-## Commit messages and PRs
+## Git conventions
 
-Explain *why*, not just *what* -- the diff already shows what changed.
-Keep PRs scoped to one logical change. CI (`.github/workflows/ci.yml`)
-runs build, vet, gofmt check, race-enabled tests, and a Docker build on
-every PR; all four must pass.
+### Branching
+
+GitHub Flow: `main` is always deployable. There are no long-lived
+`develop`/`release` branches.
+
+1. Branch off `main`.
+2. Open a PR back into `main` once it's ready for review.
+3. Merge (squash preferred, so `main`'s history stays one commit per
+   logical change) and delete the branch.
+
+Branch names are `<type>/<kebab-case-description>`, using the same
+`<type>` vocabulary as commits below:
+
+```
+feat/search-result-pagination
+fix/nil-pointer-in-writer
+docs/update-architecture-diagram
+chore/bump-nats-go
+```
+
+### Commit messages
+
+[Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>[(scope)]: <short summary, imperative mood, no trailing period>
+
+<body -- explain why, not what; the diff already shows what changed>
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
+`chore`, `ci`, `build`. **Scope** is optional and, in this repo, is
+usually a service name (`accounts`, `admins`, `search`) or an area
+(`docs`, `deps`). A breaking change gets a `!` after the type/scope
+(`feat(search)!: ...`) or a `BREAKING CHANGE:` footer.
+
+```
+feat(search): add pagination to /search
+
+Large result sets were slow to render with everything on one page.
+Adds limit/offset params with the same defaults as the other list
+endpoints.
+
+fix(accounts): stop double-counting post length
+
+chore(deps): bump nats.go to v1.54.0
+```
+
+If a PR is squash-merged, its title becomes the commit message on
+`main` -- follow the same format there.
+
+### Before opening a PR
+
+```bash
+make fmt lint test
+docker compose up -d --build   # and exercise the change against the real stack
+```
+
+CI (`.github/workflows/ci.yml`) runs build, vet, gofmt check,
+race-enabled tests, and a Docker build on every PR; all four must pass.
+Unit tests run against fakes; they will not catch a bug in how a
+handler talks to Postgres, NATS, or the shared HTTP response writer.
+This project has already shipped one nil-pointer panic that only
+showed up under live traffic (see `utils/httputils/writer_test.go`) --
+don't rely on mocked tests alone for anything that touches the HTTP or
+event-bus boundary.
 
 ## Reporting bugs / requesting features
 

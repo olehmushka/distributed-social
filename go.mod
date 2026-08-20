@@ -4,7 +4,7 @@ go 1.26.6
 
 require (
 	github.com/carlmjohnson/versioninfo v0.22.5
-	github.com/google/uuid v1.5.0
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/ipfs/go-log v1.0.5
 	github.com/jackc/pgx/v5 v5.10.0

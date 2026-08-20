@@ -1,5 +1,12 @@
 # distributed-social
 
+[![CI](https://github.com/olehmushka/distributed-social/actions/workflows/ci.yml/badge.svg)](https://github.com/olehmushka/distributed-social/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/olehmushka/distributed-social.svg)](https://pkg.go.dev/github.com/olehmushka/distributed-social)
+[![Go Report Card](https://goreportcard.com/badge/github.com/olehmushka/distributed-social)](https://goreportcard.com/report/github.com/olehmushka/distributed-social)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/olehmushka/distributed-social)](go.mod)
+[![License: MIT](https://img.shields.io/github/license/olehmushka/distributed-social)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/olehmushka/distributed-social)](https://github.com/olehmushka/distributed-social/commits/main)
+
 A small event-driven social network backend in Go: three independently
 deployable services that never share a database and never call each other
 synchronously, coordinated entirely through an event stream.
@@ -45,7 +52,8 @@ curl "localhost:9012/search?q=hello"   # now empty
 ```
 
 See [docs/architecture.md](docs/architecture.md) for how the pieces fit
-together and [docs/api/](docs/api) for the full endpoint list per service.
+together, [docs/api/](docs/api) for the full endpoint list per service,
+and [openapi/](openapi) for the machine-readable spec of each.
 
 ## Local development without Docker
 
@@ -93,3 +101,13 @@ JetStream as the event bus, `zap`/`ipfs/go-log` for structured logging.
   each get their own Postgres instance in `docker-compose.yml`
   deliberately, not as one database with three schemas, so nothing can
   accidentally take a dependency on cross-service joins.
+
+## More docs
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — dev setup, ground rules, PR checklist
+- [SECURITY.md](SECURITY.md) — how to report a vulnerability
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- [CHANGELOG.md](CHANGELOG.md)
+- [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) — instructions for AI
+  coding agents working in this repo
+- [llms.txt](llms.txt) — structured entrypoint for LLMs reading this repo

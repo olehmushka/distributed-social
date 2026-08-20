@@ -1,0 +1,123 @@
+# Local dev topology only. Each service owns its own Postgres instance and
+# nothing but that service ever connects to it directly -- accounts, admins,
+# and search only ever talk to each other through the nats event stream,
+# so each of the three can be built, deployed, and scaled independently.
+
+services:
+  nats:
+    image: nats:2-alpine
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    ports:
+      - "4222:4222"
+    volumes:
+      - nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  accounts-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accounts
+    ports:
+      - "5433:5432"
+    volumes:
+      - accounts-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  admins-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: admins
+    ports:
+      - "5434:5432"
+    volumes:
+      - admins-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  search-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: search
+    ports:
+      - "5435:5432"
+    volumes:
+      - search-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  accounts:
+    build:
+      context: .
+      dockerfile: cmd/accounts/Dockerfile
+    environment:
+      ACCOUNTS_HOST: 0.0.0.0:9010
+      ACCOUNTS_DB_DSN: postgres://postgres:postgres@accounts-db:5432/accounts?sslmode=disable
+      NATS_URL: nats://nats:4222
+      GOLOG_LOG_LEVEL: info
+    ports:
+      - "9010:9010"
+    depends_on:
+      accounts-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+  admins:
+    build:
+      context: .
+      dockerfile: cmd/admins/Dockerfile
+    environment:
+      ADMINS_HOST: 0.0.0.0:9011
+      ADMINS_DB_DSN: postgres://postgres:postgres@admins-db:5432/admins?sslmode=disable
+      NATS_URL: nats://nats:4222
+      GOLOG_LOG_LEVEL: info
+    ports:
+      - "9011:9011"
+    depends_on:
+      admins-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+  search:
+    build:
+      context: .
+      dockerfile: cmd/search/Dockerfile
+    environment:
+      SEARCH_HOST: 0.0.0.0:9012
+      SEARCH_DB_DSN: postgres://postgres:postgres@search-db:5432/search?sslmode=disable
+      NATS_URL: nats://nats:4222
+      GOLOG_LOG_LEVEL: info
+    ports:
+      - "9012:9012"
+    depends_on:
+      search-db:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+volumes:
+  nats-data:
+  accounts-db-data:
+  admins-db-data:
+  search-db-data:

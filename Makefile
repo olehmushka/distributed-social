@@ -2,9 +2,6 @@
 SHELL = /bin/bash
 .SHELLFLAGS = -o pipefail -c
 
-# base path for Lexicon document tree (for lexgen)
-LEXDIR?=../atproto/lexicons
-
 # https://github.com/golang/go/wiki/LoopvarExperiment
 export GOEXPERIMENT := loopvar
 
@@ -52,38 +49,39 @@ check: ## Compile everything, checking syntax (does not output binaries)
 .env:
 	if [ ! -f ".env" ]; then cp example.dev.env .env; fi
 
+.PHONY: up
+up: ## Start nats + all three services' postgres instances for local dev
+	docker compose up -d nats accounts-db admins-db search-db
+
+.PHONY: down
+down: ## Tear down the local dev dependencies (drops their data volumes)
+	docker compose down -v
+
+.PHONY: up-all
+up-all: ## Build and run the full stack (services included) in containers
+	docker compose up -d --build
+
+.PHONY: logs
+logs: ## Tail logs for the full stack
+	docker compose logs -f
+
 .PHONY: run-dev-accounts
-run-dev-accounts: .env ## Runs accounts for local dev
-	GOLOG_LOG_LEVEL=info go run ./cmd/accounts
-
-.PHONY: build-accounts-image
-build-accounts-image:
-	docker build -t accounts -f cmd/accounts/Dockerfile .
-
-.PHONY: run-accounts-image
-run-accounts-image:
-	docker run -p 9010:9010 accounts /accounts
+run-dev-accounts: .env ## Runs accounts for local dev (needs `make up` first)
+	ACCOUNTS_DB_DSN=postgres://postgres:postgres@localhost:5433/accounts?sslmode=disable \
+	NATS_URL=nats://localhost:4222 \
+	GOLOG_LOG_LEVEL=info \
+	go run ./cmd/accounts
 
 .PHONY: run-dev-admins
-run-dev-admins: .env ## Runs admins for local dev
-	GOLOG_LOG_LEVEL=info go run ./cmd/admins
-
-.PHONY: build-admins-image
-build-admins-image:
-	docker build -t admins -f cmd/admins/Dockerfile .
-
-.PHONY: run-admins-image
-run-admins-image:
-	docker run -p 9011:9011 admins /admins
+run-dev-admins: .env ## Runs admins for local dev (needs `make up` first)
+	ADMINS_DB_DSN=postgres://postgres:postgres@localhost:5434/admins?sslmode=disable \
+	NATS_URL=nats://localhost:4222 \
+	GOLOG_LOG_LEVEL=info \
+	go run ./cmd/admins
 
 .PHONY: run-dev-search
-run-dev-search: .env ## Runs search for local dev
-	GOLOG_LOG_LEVEL=info go run ./cmd/search
-
-.PHONY: build-search-image
-build-search-image:
-	docker build -t search -f cmd/search/Dockerfile .
-
-.PHONY: run-search-image
-run-search-image:
-	docker run -p 9012:9012 search /search
+run-dev-search: .env ## Runs search for local dev (needs `make up` first)
+	SEARCH_DB_DSN=postgres://postgres:postgres@localhost:5435/search?sslmode=disable \
+	NATS_URL=nats://localhost:4222 \
+	GOLOG_LOG_LEVEL=info \
+	go run ./cmd/search

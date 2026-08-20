@@ -23,7 +23,7 @@ func main() {
 func run(args []string) error {
 	app := cli.App{
 		Name:    "accounts",
-		Usage:   "serving account information",
+		Usage:   "owns user and post data, publishes post lifecycle events",
 		Version: versioninfo.Short(),
 	}
 	app.Flags = []cli.Flag{
@@ -31,6 +31,16 @@ func run(args []string) error {
 			Name:    "api-listen",
 			Value:   "0.0.0.0:9010",
 			EnvVars: []string{"ACCOUNTS_HOST"},
+		},
+		&cli.StringFlag{
+			Name:    "db-dsn",
+			Value:   "postgres://postgres:postgres@localhost:5433/accounts?sslmode=disable",
+			EnvVars: []string{"ACCOUNTS_DB_DSN"},
+		},
+		&cli.StringFlag{
+			Name:    "nats-url",
+			Value:   "nats://localhost:4222",
+			EnvVars: []string{"NATS_URL"},
 		},
 	}
 
@@ -43,6 +53,8 @@ func Run(cctx *cli.Context) error {
 	fx.New(
 		fx.Supply(server.Addr(cctx.String("api-listen"))),
 		fx.Supply(server.Name("accounts")),
+		fx.Supply(server.DBDSN(cctx.String("db-dsn"))),
+		fx.Supply(server.NatsURL(cctx.String("nats-url"))),
 		fx.Provide(func() *logging.ZapEventLogger { return logging.Logger("accounts") }),
 		accounts.Module,
 		server.Module,

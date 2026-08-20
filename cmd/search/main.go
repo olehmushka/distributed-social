@@ -23,7 +23,7 @@ func main() {
 func run(args []string) error {
 	app := cli.App{
 		Name:    "search",
-		Usage:   "search indexing and query service",
+		Usage:   "builds a full-text index from the event stream and serves queries against it",
 		Version: versioninfo.Short(),
 	}
 	app.Flags = []cli.Flag{
@@ -31,6 +31,16 @@ func run(args []string) error {
 			Name:    "api-listen",
 			Value:   "0.0.0.0:9012",
 			EnvVars: []string{"SEARCH_HOST"},
+		},
+		&cli.StringFlag{
+			Name:    "db-dsn",
+			Value:   "postgres://postgres:postgres@localhost:5435/search?sslmode=disable",
+			EnvVars: []string{"SEARCH_DB_DSN"},
+		},
+		&cli.StringFlag{
+			Name:    "nats-url",
+			Value:   "nats://localhost:4222",
+			EnvVars: []string{"NATS_URL"},
 		},
 	}
 
@@ -43,6 +53,8 @@ func Run(cctx *cli.Context) error {
 	fx.New(
 		fx.Supply(server.Addr(cctx.String("api-listen"))),
 		fx.Supply(server.Name("search")),
+		fx.Supply(server.DBDSN(cctx.String("db-dsn"))),
+		fx.Supply(server.NatsURL(cctx.String("nats-url"))),
 		fx.Provide(func() *logging.ZapEventLogger { return logging.Logger("search") }),
 		search.Module,
 		server.Module,

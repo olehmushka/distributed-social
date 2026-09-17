@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/ipfs/go-log v1.0.5
-	github.com/jackc/pgx/v5 v5.10.0
+	github.com/jackc/pgx/v5 v5.11.0
 	github.com/nats-io/nats.go v1.53.1
 	github.com/urfave/cli/v2 v2.27.7
 	go.uber.org/fx v1.24.0

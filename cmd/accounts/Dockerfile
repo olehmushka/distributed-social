@@ -1,5 +1,5 @@
 ### Compile stage
-FROM golang:1.27.1-alpine AS build-env
+FROM golang:1.27.2-alpine AS build-env
 RUN apk add --no-cache build-base make git
 
 ADD . /dockerbuild

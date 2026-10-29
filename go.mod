@@ -8,7 +8,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/ipfs/go-log v1.0.5
 	github.com/jackc/pgx/v5 v5.11.0
-	github.com/nats-io/nats.go v1.54.0
+	github.com/nats-io/nats.go v1.55.0
 	github.com/urfave/cli/v2 v2.27.7
 	go.uber.org/fx v1.24.0
 	go.uber.org/zap v1.28.0
